@@ -89,6 +89,7 @@ $(function () {
 function clearChess() {
     initChess($rootElem)
     history = []
+    setCurrentColor()
 }
 //悔棋 
 function restoreChess() {
