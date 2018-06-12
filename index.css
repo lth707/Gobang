@@ -1,5 +1,4 @@
 #chess {
-    position: relative;
     width: 600px;
     height: 600px;
     margin: 0 auto;
@@ -8,6 +7,9 @@
     background-position: 20px 20px;
     background-clip: padding-box;
     border: transparent;
+    transform: translate(0, 50vh);
+    position: relative;
+    top: -300px;
 }
 
 .chess-item {
