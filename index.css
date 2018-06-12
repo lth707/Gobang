@@ -13,11 +13,10 @@
 }
 
 .chess-item {
-    /* background: #ffff00; */
-    /* border: 1px solid #000000; */
     width: 40px;
     height: 40px;
     position: absolute;
+    cursor: pointer;
 }
 
 .chess-item .chess-item-piece {
@@ -25,4 +24,5 @@
     height: 20px;
     width: 20px;
     margin: 10px auto;
+    box-shadow: #5f5f5f 2px 2px 2px;
 }

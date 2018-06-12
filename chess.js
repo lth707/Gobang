@@ -5,7 +5,17 @@ let offset = 40;
 const emptyColor = 0, blackColor = 1, whiteColor = 2;
 const chessItemHtml = '<div class="chess-item"></div>';
 const pieceHtml = '<div class="chess-item-piece"></div>';
+const pieceHoverHtml = '<div class="chess-item-piece hover"></div>';
 let currentColor = 'white';
+let currentColorMap = {
+    'white': '白方',
+    'black': '黑方'
+}
+let reverseCurrentColorMap = {
+    'white': '黑方',
+    'black': '白方'
+}
+
 let $rootElem;
 let leftToRight = [0, 1], rigthToLeft = [0, -1],
     topToBottom = [1, 0], bottomToTop = [-1, 0],
@@ -30,6 +40,7 @@ function initChess($root) {
                 .attr('col', i).attr('row', j)
                 .data('col', i).data('row', j)
                 .click(handleClick);
+            handleHover($chessItem);
             $root.append($chessItem);
         }
         chessArray.push(col)
@@ -39,6 +50,41 @@ function initChess($root) {
         restoreChess: restoreChess
     }
 }
+// 设置当前的颜色
+function setCurrentColor() {
+    var $time = $('.time');
+    $('.current-color').text('当前颜色为：' + currentColorMap[currentColor])
+    $time.css('color', 'green');
+    $time.text('60s');
+    $time.data('seconds', 60)
+}
+$(function () {
+    setCurrentColor();
+    var iid;
+    var handleInterval = function () {
+        var $time = $('.time');
+        var seconds = $time.data('seconds') == undefined ? 60 : $time.data('seconds')
+        $time.text(seconds + 's')
+        if (seconds < 10) {
+            $time.css('color', 'red');
+        } else {
+            $time.css('color', 'green');
+        }
+        if (!seconds) {
+            clearInterval(iid);
+            layer.alert('时间到，' + reverseCurrentColorMap[currentColor] + '胜', function () {
+                clearChess();
+                $time.css('color', 'green');
+                $time.text('60s');
+                $time.data('seconds', 60)
+                iid = setInterval(handleInterval, 1000);
+                layer.closeAll();
+            })
+        }
+        $time.data('seconds', --seconds);
+    }
+    iid = setInterval(handleInterval, 1000);
+})
 //清空棋盘
 function clearChess() {
     initChess($rootElem)
@@ -58,6 +104,7 @@ function restoreChess() {
     } else {
         currentColor = 'white'
     }
+    setCurrentColor();
 }
 //处理棋盘点击事件
 function handleClick() {
@@ -84,12 +131,29 @@ function handleClick() {
         result = judgeWinner(row, col)
         currentColor = 'white'
     }
+    setCurrentColor();
     $this.append($piece)
     if (result) {
         setTimeout(function () {
             clearChess()
         }, 500);
     }
+}
+
+function handleHover($chessItem) {
+    $chessItem.hover(function () {
+        var $pieceHover = $(pieceHoverHtml)
+        var $this = $(this);
+        if (currentColor === 'white') {
+            $pieceHover.css('background', '#ffffff');
+        } else {
+            $pieceHover.css('background', '#000000');
+        }
+        $this.append($pieceHover);
+    }, function () {
+        var $this = $(this);
+        $this.find('.hover').remove();
+    })
 }
 
 function handleDirection(beginPoint, leftSide, rightSide, topSide, bottomSide, direction) {
@@ -102,7 +166,7 @@ function handleDirection(beginPoint, leftSide, rightSide, topSide, bottomSide, d
             if (chessArray[currentRow][currentCol] === whiteColor) {
                 totalWhiteCount++;
                 if (totalWhiteCount >= 5) {
-                    layer.alert('白胜')
+                    layer.alert(currentColorMap[currentColor] + '胜')
                     return true;
                 }
             } else {
@@ -112,7 +176,7 @@ function handleDirection(beginPoint, leftSide, rightSide, topSide, bottomSide, d
             if (chessArray[currentRow][currentCol] === blackColor) {
                 totalBlackCount++;
                 if (totalBlackCount >= 5) {
-                    layer.alert('黑胜')
+                    layer.alert(currentColorMap[currentColor] + '胜')
                     return true;
                 }
             } else {
