@@ -2,7 +2,7 @@
     width: 600px;
     height: 600px;
     margin: 0 auto;
-    background: linear-gradient(90deg, #000000 0, transparent 1px), linear-gradient( #000000 0, #ffff00 1px);
+    background: linear-gradient(90deg, #000000 0, transparent 1px), linear-gradient( #000000 0, #eabc79 1px);
     background-size: 40px 40px;
     background-position: 20px 20px;
     background-clip: padding-box;
