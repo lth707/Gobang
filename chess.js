@@ -11,6 +11,7 @@ let leftToRight = [0, 1], rigthToLeft = [0, -1],
     topToBottom = [1, 0], bottomToTop = [-1, 0],
     leftTopToRightBottom = [1, 1], rightBottomToLeftTop = [-1, -1],
     leftBottomToRightTop = [-1, 1], rigthTopToLeftBottom = [1, -1];
+let history = [];//用于存储下棋的步骤，可用于悔棋
 //初始化函数
 function initChess($root) {
     $root.empty()
@@ -26,26 +27,48 @@ function initChess($root) {
                 top: j * offset,
                 left: i * offset
             }).data('value', emptyColor)
+                .attr('col', i).attr('row', j)
                 .data('col', i).data('row', j)
                 .click(handleClick);
             $root.append($chessItem);
         }
         chessArray.push(col)
     }
+    return {
+        clearChess: clearChess,
+        restoreChess: restoreChess
+    }
 }
 //清空棋盘
-function claerChess() {
+function clearChess() {
     initChess($rootElem)
+    history = []
+}
+//悔棋 
+function restoreChess() {
+    var position = history.pop()
+    var row = position[0]
+    var col = position[1]
+    var $div = $rootElem.find('[row=' + row + '][col=' + col + ']');
+    chessArray[row][col] = emptyColor;
+    $div.data('value', emptyColor);
+    $div.empty();
+    if (currentColor == 'white') {
+        currentColor = 'black'
+    } else {
+        currentColor = 'white'
+    }
 }
 //处理棋盘点击事件
 function handleClick() {
     let $this = $(this);
     if ($this.data('value') !== emptyColor) {
-        layer.msg('this place has piece');
+        layer.msg('该位置已经放置了棋子');
         return false;
     }
     let col = $this.data('col')
     let row = $this.data('row')
+    history.push([row, col])
     $piece = $(pieceHtml);
     let result
     if (currentColor === 'white') {
@@ -64,7 +87,7 @@ function handleClick() {
     $this.append($piece)
     if (result) {
         setTimeout(function () {
-            claerChess()
+            clearChess()
         }, 500);
     }
 }
