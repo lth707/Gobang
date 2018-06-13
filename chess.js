@@ -143,8 +143,9 @@ function handleClick() {
 
 function handleHover($chessItem) {
     $chessItem.hover(function () {
-        var $pieceHover = $(pieceHoverHtml)
         var $this = $(this);
+        if ($this.data('value') !== emptyColor) { return false }
+        var $pieceHover = $(pieceHoverHtml)
         if (currentColor === 'white') {
             $pieceHover.css('background', '#ffffff');
         } else {
@@ -157,48 +158,82 @@ function handleHover($chessItem) {
     })
 }
 
-function handleDirection(beginPoint, leftSide, rightSide, topSide, bottomSide, direction) {
-    let totalWhiteCount = 0;
-    let totalBlackCount = 0;
+function handleDirection(beginPoint, leftSide, rightSide, topSide, bottomSide, direction, totalWhiteCount, totalBlackCount) {
     let currentRow = beginPoint[0];
     let currentCol = beginPoint[1];
+    let whiteFlag = true;
+    let blackFlag = true;
     while (currentRow >= topSide && currentRow <= bottomSide && currentCol >= leftSide && currentCol <= rightSide) {
         if (currentColor == 'white') {
-            if (chessArray[currentRow][currentCol] === whiteColor) {
+            if (whiteFlag && chessArray[currentRow][currentCol] === whiteColor) {
                 totalWhiteCount++;
-                if (totalWhiteCount >= 5) {
+                if (totalWhiteCount >= 6) {
                     layer.alert(currentColorMap[currentColor] + '胜')
                     return true;
                 }
             } else {
-                totalWhiteCount = 0;
+                whiteFlag = false;
             }
         } else {
-            if (chessArray[currentRow][currentCol] === blackColor) {
+            if (blackFlag && chessArray[currentRow][currentCol] === blackColor) {
                 totalBlackCount++;
-                if (totalBlackCount >= 5) {
+                if (totalBlackCount >= 6) {
                     layer.alert(currentColorMap[currentColor] + '胜')
                     return true;
                 }
             } else {
-                totalBlackCount = 0;
+                blackFlag = false;
             }
         }
         currentRow += direction[0];
         currentCol += direction[1];
     }
+    return { totalWhiteCount: totalWhiteCount, totalBlackCount: totalBlackCount }
 }
 
 //判断胜负
 function judgeWinner(row, col) {
     let result = false;
-    result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftToRight)//左到右方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rigthToLeft)//右到左向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, topToBottom)//上到下方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, bottomToTop)//下到上方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftTopToRightBottom)//左上到右下方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rightBottomToLeftTop)//右下到左上方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftBottomToRightTop)//左下到右上方向扫描
-    result = result || handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rigthTopToLeftBottom)//右上到左下方向扫描
+
+    result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftToRight, 0, 0)//左到右方向扫描
+    if (typeof result == 'boolean' && result) {
+        return result;
+    } else {
+        result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rigthToLeft, result.totalWhiteCount, result.totalBlackCount)//右到左向扫描
+    }
+    if (typeof result == 'boolean' && result) {
+        return result;
+    }
+    result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, topToBottom, 0, 0)//上到下方向扫描
+    if (typeof result == 'boolean' && result) {
+        return result;
+    } else {
+        result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, bottomToTop, result.totalWhiteCount, result.totalBlackCount)//下到上方向扫描
+    }
+    if (typeof result == 'boolean' && result) {
+        return result;
+    }
+
+    result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftTopToRightBottom, 0, 0)//左上到右下方向扫描
+    if (typeof result == 'boolean' && result) {
+        return result;
+    } else {
+        result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rightBottomToLeftTop, result.totalWhiteCount, result.totalBlackCount)//右下到左上方向扫描
+    }
+    if (typeof result == 'boolean' && result) {
+        return result;
+    }
+
+    result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, leftBottomToRightTop, 0, 0)//左下到右上方向扫描
+    if (typeof result == 'boolean' && result) {
+        return result;
+    } else {
+        result = handleDirection([row, col], 0, chessWidth - 1, 0, chessHeight - 1, rigthTopToLeftBottom, result.totalWhiteCount, result.totalBlackCount)//右上到左下方向扫描
+    }
+    if (typeof result == 'boolean' && result) {
+        return result;
+    } else {
+        result = false;
+    }
     return result
 }
